@@ -3,7 +3,7 @@ import java.util.*;
 public class NonPreemptiveSJF {
 
     public void Schedule(List<Process> Processes, int GettingOlder) {
-      //  Prepare the QUeue
+        // Prepare the Queue
         Processes.sort(Comparator.comparingInt(P -> P.ArrivalTime));
         PriorityQueue<Process> ReadyQueue = new PriorityQueue<>(
                 Comparator.comparingInt((Process P) -> P.Priority)
@@ -15,51 +15,48 @@ public class NonPreemptiveSJF {
         int TotalWaitingTime = 0;
         int TotalTurnaroundTime = 0;
 
-
-        //Make the priorty equals the brust time, because it will be used for aging latter.
+        // Initialize priority with burst time for aging logic
         for (Process P : Processes) {
             P.Priority = P.BurstTime;
         }
 
         while (ExecutedCount < Processes.size()) {
-           //Put in ReadyQueue
+            // Add processes to the ReadyQueue based on arrival time
             for (Process P : Processes) {
                 if (P.ArrivalTime <= CurrentTime && P.RemainingTime > 0 && !ReadyQueue.contains(P)) {
                     ReadyQueue.add(P);
                 }
             }
 
-           // After waiting for certain time, AGE();
+            // Apply Aging: Reduce priority of waiting processes if they wait too long
             for (Process P : ReadyQueue) {
                 if (CurrentTime - P.ArrivalTime >= GettingOlder) {
-                    P.Priority -= 1;
+                    P.Priority = Math.max(P.Priority - 1, 1); // Ensure priority doesn't go below 1
                 }
             }
 
+            // Execute the process with the highest priority
             if (!ReadyQueue.isEmpty()) {
-
                 Process CurrentProcess = ReadyQueue.poll();
-
 
                 int ExecutionTime = CurrentProcess.BurstTime;
                 CurrentTime += ExecutionTime;
                 CurrentProcess.RemainingTime = 0;
 
-
+                // Calculate waiting time and turnaround time
                 CurrentProcess.TurnaroundTime = CurrentTime - CurrentProcess.ArrivalTime;
                 CurrentProcess.WaitingTime = CurrentProcess.TurnaroundTime - CurrentProcess.BurstTime;
+
                 TotalWaitingTime += CurrentProcess.WaitingTime;
                 TotalTurnaroundTime += CurrentProcess.TurnaroundTime;
                 ExecutionOrder.add(CurrentProcess.ProcessId);
                 ExecutedCount++;
-
             } else {
-
                 CurrentTime++;
             }
         }
 
-
+        // Display the results
         System.out.println("######## Processes Execution Order ########");
         System.out.println("Processes Execution Order: " + ExecutionOrder);
         System.out.println("\n######## Waiting Time and Turnaround Time ########");

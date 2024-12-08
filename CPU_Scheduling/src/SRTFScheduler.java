@@ -1,74 +1,101 @@
 import java.util.*;
+
 public class SRTFScheduler {
 
-    public void Schedule(List<Process> Processes) {
+    public void Schedule(List<Process> processes, int MaximumAge) {
+        processes.sort(Comparator.comparingInt(p -> p.ArrivalTime));
 
-        Processes.sort(Comparator.comparingInt(P -> P.ArrivalTime));
+        PriorityQueue<Process> readyQueue = new PriorityQueue<>(
+                Comparator.comparingInt((Process p) -> p.RemainingTime)
+                        .thenComparingInt(p -> p.ArrivalTime));
 
-        PriorityQueue<Process> ReadyQueue = new PriorityQueue<>(
-                Comparator.comparingInt((Process P) -> P.RemainingTime)
-                        .thenComparingInt(P -> P.ArrivalTime));
+        List<Integer> executionOrder = new ArrayList<>();
+        int currentTime = 0;
+        int totalWaitingTime = 0;
+        int totalTurnaroundTime = 0;
+        int executedCount = 0;
+        Deque<Process> important = new LinkedList<>();
 
-        List<Integer> ExecutionOrder = new ArrayList<>();
-        int CurrentTime = 0;
-        int TotalWaitingTime = 0;
-        int TotalTurnaroundTime = 0;
-        int ExecutedCount = 0;
-        int LastProcessId = -1; // Track the last executed process to avoid repetition
-
-        while (ExecutedCount < Processes.size()) {
-
-            for (Process P : Processes) {
-                if (P.ArrivalTime <= CurrentTime && P.RemainingTime > 0 && !ReadyQueue.contains(P)) {
-                    ReadyQueue.add(P);
+        while (executedCount < processes.size()) {
+            for (Process p : processes) {
+                if (p.ArrivalTime <= currentTime && p.RemainingTime > 0 && !readyQueue.contains(p)) {
+                    readyQueue.add(p);
                 }
             }
 
-            if (!ReadyQueue.isEmpty()) {
+            Iterator<Process> iterator = readyQueue.iterator();
+            while (iterator.hasNext()) {
+                Process p = iterator.next();
+                if (p.age >= MaximumAge) {
+                    important.add(p);
+                    iterator.remove();
+                }
+            }
 
-                Process CurrentProcess = ReadyQueue.poll();
+            if (!important.isEmpty()) {
+                // Execute aged processes first
+                for (Process p : important) {
+                    executionOrder.add(p.ProcessId);
+                    currentTime += p.RemainingTime;
+                    p.RemainingTime = 0;
 
+                    p.TurnaroundTime = currentTime - p.ArrivalTime;
+                    p.WaitingTime = p.TurnaroundTime - p.BurstTime;
 
-                CurrentProcess.RemainingTime--;
-                CurrentTime++;
+                    totalWaitingTime += p.WaitingTime;
+                    totalTurnaroundTime += p.TurnaroundTime;
+                    executedCount++;
+                }
+                important.clear();
+            } else if (!readyQueue.isEmpty()) {
+                Process currentProcess = readyQueue.poll();
 
-                if (CurrentProcess.ProcessId != LastProcessId) {
-                    ExecutionOrder.add(CurrentProcess.ProcessId);
-                    LastProcessId = CurrentProcess.ProcessId;
+                currentProcess.RemainingTime--;
+                currentTime++;
+
+                // Add process ID to execution order (only when it starts or switches)
+                if (executionOrder.isEmpty() || executionOrder.get(executionOrder.size() - 1) != currentProcess.ProcessId) {
+                    executionOrder.add(currentProcess.ProcessId);
                 }
 
+                // Increment the age of waiting processes
+                for (Process p : readyQueue) {
+                    p.age++;
+                }
 
-                if (CurrentProcess.RemainingTime == 0) {
-                    ExecutedCount++;
-                    CurrentProcess.TurnaroundTime = CurrentTime - CurrentProcess.ArrivalTime;
-                    CurrentProcess.WaitingTime = CurrentProcess.TurnaroundTime - CurrentProcess.BurstTime;
-                    TotalWaitingTime += CurrentProcess.WaitingTime;
-                    TotalTurnaroundTime += CurrentProcess.TurnaroundTime;
+                // Check if the process is completed
+                if (currentProcess.RemainingTime == 0) {
+                    executedCount++;
+                    currentProcess.TurnaroundTime = currentTime - currentProcess.ArrivalTime;
+                    currentProcess.WaitingTime = currentProcess.TurnaroundTime - currentProcess.BurstTime;
+
+                    totalWaitingTime += currentProcess.WaitingTime;
+                    totalTurnaroundTime += currentProcess.TurnaroundTime;
                 } else {
-                    // If the process is not finished, add it back to the queue
-                    ReadyQueue.add(CurrentProcess);
+                    // Add the process back to the ready queue if not completed
+                    readyQueue.add(currentProcess);
                 }
             } else {
                 // If no process is ready, increment time
-                CurrentTime++;
+                currentTime++;
             }
         }
 
-
+        // Output Results
         System.out.println("######## Processes Execution Order ########");
-        System.out.println("Processes Execution Order: " + ExecutionOrder);
+        System.out.println("Processes Execution Order: " + executionOrder);
         System.out.println("\n######## Waiting Time and Turnaround Time ########");
-        System.out.println("\nPID     Waiting Time    Turnaround Time");
-        for (Process P : Processes) {
-            System.out.printf("P%d      %-14d %d\n", P.ProcessId, P.WaitingTime, P.TurnaroundTime);
+        System.out.println("PID     Waiting Time    Turnaround Time");
+        for (Process p : processes) {
+            System.out.printf("P%d      %-14d %d\n", p.ProcessId, p.WaitingTime, p.TurnaroundTime);
         }
 
-        double AverageWaitingTime = (double) TotalWaitingTime / Processes.size();
-        double AverageTurnaroundTime = (double) TotalTurnaroundTime / Processes.size();
+        double averageWaitingTime = (double) totalWaitingTime / processes.size();
+        double averageTurnaroundTime = (double) totalTurnaroundTime / processes.size();
 
         System.out.println("\n######## Averages ########");
-        System.out.printf("Average Waiting Time: %.2f\n", AverageWaitingTime);
-        System.out.printf("Average Turnaround Time: %.2f\n", AverageTurnaroundTime);
-
+        System.out.printf("Average Waiting Time: %.2f\n", averageWaitingTime);
+        System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
     }
+
 }

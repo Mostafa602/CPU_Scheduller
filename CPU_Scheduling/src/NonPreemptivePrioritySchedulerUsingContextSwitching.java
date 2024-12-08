@@ -3,9 +3,7 @@ import java.util.*;
 public class NonPreemptivePrioritySchedulerUsingContextSwitching {
 
 
-    private static final int SwitchTime = 1;
-
-    public void Schedule(List<Process> Processes) {
+    public void Schedule(List<Process> Processes, int SwitchTime) {
         Processes.sort(Comparator.comparingInt((Process P) -> P.ArrivalTime)
                 .thenComparingInt(P -> P.Priority));
         List<Integer> ExecutionOrder = new ArrayList<>();
@@ -42,9 +40,11 @@ public class NonPreemptivePrioritySchedulerUsingContextSwitching {
 
 
         System.out.println("######## Processes Execution Order ########");
+
         System.out.println("Processes Execution Order: " + ExecutionOrder);
         System.out.println("\n######## Waiting Time and Turnaround Time ########");
         System.out.println("\nPID     Waiting Time    Turnaround Time");
+        Processes.sort(Comparator.comparingInt((Process P) -> P.ProcessId));
         for (Process P : Processes) {
             System.out.printf("P%d      %-14d %d\n", P.ProcessId, P.WaitingTime, P.TurnaroundTime);
         }

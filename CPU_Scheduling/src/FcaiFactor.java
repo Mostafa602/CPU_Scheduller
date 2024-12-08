@@ -2,9 +2,10 @@ import java.util.*;
 
 public class FcaiFactor {
 
-    public void Schedule(List<Process> Processes) {
-        System.out.println("######## Waiting Time and Turnaround Time ########");
-        System.out.println("\nPID     Waiting Time    Turnaround Time");
+    public List<timeLine> Schedule(List<Process> Processes) {
+
+        List<timeLine> TimeLine = new ArrayList<timeLine>();
+
         Processes.sort(Comparator.comparingInt(P -> P.ArrivalTime));
         int P_Size = Processes.size();
         double v1 = 0,v2 = 0;
@@ -17,12 +18,13 @@ public class FcaiFactor {
         for (Process p : Processes) {
             p.Calc_FcaiFactor(v1,v2);
         }
+        int lst_time = 0;
         int CurrentTime = 0;
         int ExecutedCount = 0;
         int TotalWaitingTime = 0;
         int TotalTurnaroundTime = 0;
         Deque<Process> ready = new LinkedList<>();
-        List<Integer>executionOrder = new ArrayList<Integer>();
+        List<Process>executionOrder = new ArrayList<Process>();
         boolean is_completed = false;
         while(ExecutedCount < P_Size) {
             Iterator<Process> it = Processes.iterator();
@@ -68,7 +70,7 @@ public class FcaiFactor {
                     Process p = it3.next();
                     if(p.fcaiFactor < currentProcess.fcaiFactor) {
                         preempted=true;
-//                        System.out.println("Process name: "+currentProcess.ProcessId+" Remaining time: "+currentProcess.RemainingTime+" Quantum: "+currentProcess.quantum+" current FCAIFactor: "+currentProcess.fcaiFactor);
+                        System.out.println("Process name: "+currentProcess.ProcessId+" Remaining time: "+currentProcess.RemainingTime+" Quantum: "+currentProcess.quantum+" current FCAIFactor: "+currentProcess.fcaiFactor);
                         currentProcess.Calc_FcaiFactor(v1,v2);
                         if(currentProcess.RemainingTime > 0) {
                             ready.add(currentProcess);
@@ -82,6 +84,9 @@ public class FcaiFactor {
                 currentProcess.RemainingTime--;
             }
             if (preempted) {
+                timeLine time = new timeLine(currentProcess,lst_time,CurrentTime);
+                TimeLine.add(time);
+                lst_time = CurrentTime;
                 is_completed = false;
                 currentProcess.quantum += (currentProcess.quantum - exect_time);
             } else {
@@ -96,13 +101,20 @@ public class FcaiFactor {
                     TotalWaitingTime += currentProcess.WaitingTime;
                     TotalTurnaroundTime += currentProcess.TurnaroundTime;
                     ExecutedCount++;
-                    executionOrder.add(currentProcess.ProcessId);
-                    System.out.printf("P%d      %-14d %d\n", currentProcess.ProcessId, currentProcess.WaitingTime, currentProcess.TurnaroundTime);
+                    executionOrder.add(currentProcess);
                 }
+                timeLine time = new timeLine(currentProcess,lst_time,CurrentTime);
+                TimeLine.add(time);
+                lst_time = CurrentTime;
             }
 
         }
 
+        System.out.println("\n######## Waiting Time and Turnaround Time ########");
+        System.out.println("\nPID     Waiting Time    Turnaround Time");
+        for (Process p : executionOrder) {
+            System.out.printf("P%d      %-14d %d\n", p.ProcessId, p.WaitingTime, p.TurnaroundTime);
+        }
 
         double AverageWaitingTime = (double) TotalWaitingTime / P_Size;
         double AverageTurnaroundTime = (double) TotalTurnaroundTime / P_Size;
@@ -111,9 +123,11 @@ public class FcaiFactor {
         System.out.printf("Average Waiting Time: %.2f\n", AverageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", AverageTurnaroundTime);
 
-
         System.out.println("\n######## Processes Execution Order ########");
         System.out.println("Processes Execution Order: " + executionOrder);
+
+        return TimeLine;
+
 
     }
 

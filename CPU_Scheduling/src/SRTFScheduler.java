@@ -2,7 +2,7 @@ import java.util.*;
 
 public class SRTFScheduler {
 
-    public void Schedule(List<Process> processes, int MaximumAge) {
+    public void Schedule(List<Process> processes, int MaximumAge, int ContextSwitch) {
         processes.sort(Comparator.comparingInt(p -> p.ArrivalTime));
 
         PriorityQueue<Process> readyQueue = new PriorityQueue<>(
@@ -37,6 +37,7 @@ public class SRTFScheduler {
                 for (Process p : important) {
                     executionOrder.add(p.ProcessId);
                     currentTime += p.RemainingTime;
+                    currentTime += ContextSwitch;
                     p.RemainingTime = 0;
 
                     p.TurnaroundTime = currentTime - p.ArrivalTime;
@@ -49,6 +50,12 @@ public class SRTFScheduler {
                 important.clear();
             } else if (!readyQueue.isEmpty()) {
                 Process currentProcess = readyQueue.poll();
+
+                // Check if the context switching is needed
+                if (!executionOrder.isEmpty() && executionOrder.get(executionOrder.size() - 1) != currentProcess.ProcessId) {
+                    currentTime += ContextSwitch;  // Add context switching time
+                }
+
 
                 currentProcess.RemainingTime--;
                 currentTime++;

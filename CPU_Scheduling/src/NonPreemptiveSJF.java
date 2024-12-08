@@ -31,7 +31,6 @@ public class NonPreemptiveSJF {
                 }
             }
 
-
             if(!important.isEmpty()) {
                 for(Process p : important) {
                     currentTime += p.BurstTime;

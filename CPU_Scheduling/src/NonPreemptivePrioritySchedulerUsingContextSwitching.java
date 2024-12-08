@@ -3,21 +3,25 @@ import java.util.*;
 public class NonPreemptivePrioritySchedulerUsingContextSwitching {
 
 
-    public void Schedule(List<Process> Processes, int SwitchTime) {
+    public List<timeLine> Schedule(List<Process> Processes, int SwitchTime) {
+        List<timeLine> TimeLine = new ArrayList<timeLine>();
+
         Processes.sort(Comparator.comparingInt((Process P) -> P.ArrivalTime)
                 .thenComparingInt(P -> P.Priority));
         List<Integer> ExecutionOrder = new ArrayList<>();
+
+        int lst_time = 0;
         int CurrentTime = 0;
         int TotalWaitingTime = 0;
         int TotalTurnaroundTime = 0;
 
-
-
         for (Process P : Processes) {
+            lst_time = CurrentTime;
             // wait for it to arrive
             if (CurrentTime < P.ArrivalTime) {
                 CurrentTime = P.ArrivalTime;
             }
+
             //if not first add switch time
             if (CurrentTime > P.ArrivalTime) {
                 CurrentTime += SwitchTime;
@@ -28,7 +32,8 @@ public class NonPreemptivePrioritySchedulerUsingContextSwitching {
             CurrentTime += ExecutionTime;
             P.RemainingTime -= ExecutionTime;
 
-
+            timeLine t = new timeLine(P,lst_time,CurrentTime);
+            TimeLine.add(t);
 
             P.TurnaroundTime = CurrentTime - P.ArrivalTime;
             P.WaitingTime = P.TurnaroundTime - P.BurstTime;
@@ -58,5 +63,8 @@ public class NonPreemptivePrioritySchedulerUsingContextSwitching {
         System.out.println("\n######## Averages ########");
         System.out.printf("Average Waiting Time: %.2f\n", AverageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", AverageTurnaroundTime);
+
+
+        return TimeLine;
     }
 }

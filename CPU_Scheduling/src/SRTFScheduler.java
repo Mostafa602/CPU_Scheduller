@@ -2,7 +2,10 @@ import java.util.*;
 
 public class SRTFScheduler {
 
-    public void Schedule(List<Process> processes, int MaximumAge, int ContextSwitch) {
+    public List<timeLine> Schedule(List<Process> processes, int MaximumAge, int ContextSwitch) {
+
+        List<timeLine> TimeLine = new ArrayList<timeLine>();
+
         processes.sort(Comparator.comparingInt(p -> p.ArrivalTime));
 
         PriorityQueue<Process> readyQueue = new PriorityQueue<>(
@@ -10,6 +13,7 @@ public class SRTFScheduler {
                         .thenComparingInt(p -> p.ArrivalTime));
 
         List<Integer> executionOrder = new ArrayList<>();
+        int lst_time = 0;
         int currentTime = 0;
         int totalWaitingTime = 0;
         int totalTurnaroundTime = 0;
@@ -38,6 +42,7 @@ public class SRTFScheduler {
                     executionOrder.add(p.ProcessId);
                     currentTime += p.RemainingTime;
                     currentTime += ContextSwitch;
+
                     p.RemainingTime = 0;
 
                     p.TurnaroundTime = currentTime - p.ArrivalTime;
@@ -103,6 +108,10 @@ public class SRTFScheduler {
         System.out.println("\n######## Averages ########");
         System.out.printf("Average Waiting Time: %.2f\n", averageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
+
+
+        return TimeLine;
+
     }
 
 }

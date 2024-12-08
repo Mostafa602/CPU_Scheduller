@@ -29,29 +29,19 @@ public class Main {
 //       }
 
 
-//        List<Process> ProcessList = new ArrayList<>();
-//        ProcessList.add(new Process(1, 0, 2));
-//        ProcessList.add(new Process(2, 0, 10));
-//        ProcessList.add(new Process(3, 1, 2));
-//        ProcessList.add(new Process(4, 2, 2));
-//        ProcessList.add(new Process(5, 3, 2));
-//
-//
-//        NonPreemptiveSJF SJF = new NonPreemptiveSJF();
-//        SJF.Schedule(ProcessList,2);
+        List<Process> ProcessList = new ArrayList<>();
+        ProcessList.add(new Process(1, 0, 2,"0000"));
+        ProcessList.add(new Process(2, 0, 10,"0000"));
+        ProcessList.add(new Process(3, 1, 2,"0000"));
+        ProcessList.add(new Process(4, 2, 2,"0000"));
+        ProcessList.add(new Process(5, 3, 2,"0000"));
 
 
-        //Starvation Case
-
-
-//        List<Process> ProcessList = new ArrayList<>();
-//        ProcessList.add(new Process(1, 0, 17));
-//        ProcessList.add(new Process(2, 3, 6));
-//        ProcessList.add(new Process(3, 4, 10));
-//        ProcessList.add(new Process(4, 29, 4));
-//
-//        NonPreemptiveSJF SJF = new NonPreemptiveSJF();
-//        SJF.Schedule(ProcessList,5);
+        NonPreemptiveSJF SJF = new NonPreemptiveSJF();
+        List<timeLine>t = SJF.Schedule(ProcessList,2);
+        for(timeLine tz : t) {
+           System.out.println(tz.p.ProcessId+" "+tz.start+" "+tz.end);
+       }
 
 
 //        List<Process> ProcessList = new ArrayList<>();

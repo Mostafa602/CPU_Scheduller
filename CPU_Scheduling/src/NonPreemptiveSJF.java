@@ -3,11 +3,15 @@ import java.util.*;
 
 public class NonPreemptiveSJF {
 
-    public void Schedule(List<Process> processes,int MaximumAge) {
+    public List<timeLine> Schedule(List<Process> processes,int MaximumAge) {
+
+        List<timeLine> TimeLine = new ArrayList<timeLine>();
+
         // Sort processes by arrival time
         processes.sort(Comparator.comparingInt(p -> p.ArrivalTime));
 
         List<Integer> executionOrder = new ArrayList<>();
+        int lst_time = 0;
         int currentTime = 0;
         int executedCount = 0;
         int totalWaitingTime = 0;
@@ -35,7 +39,9 @@ public class NonPreemptiveSJF {
                 for(Process p : important) {
                     currentTime += p.BurstTime;
                     p.RemainingTime = 0;
-
+                    timeLine time = new timeLine(p,lst_time,currentTime);
+                    TimeLine.add(time);
+                    lst_time = currentTime;
                     p.TurnaroundTime = currentTime - p.ArrivalTime;
                     p.WaitingTime = p.TurnaroundTime - p.BurstTime;
 
@@ -55,7 +61,9 @@ public class NonPreemptiveSJF {
                     }
                     currentTime += currentProcess.BurstTime;
                     currentProcess.RemainingTime = 0;
-
+                    timeLine time = new timeLine(currentProcess,lst_time,currentTime);
+                    TimeLine.add(time);
+                    lst_time = currentTime;
                     currentProcess.TurnaroundTime = currentTime - currentProcess.ArrivalTime;
                     currentProcess.WaitingTime = currentProcess.TurnaroundTime - currentProcess.BurstTime;
 
@@ -89,6 +97,9 @@ public class NonPreemptiveSJF {
         System.out.println("\n######## Averages ########");
         System.out.printf("Average Waiting Time: %.2f\n", averageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
+
+        return TimeLine;
+
     }
 
 

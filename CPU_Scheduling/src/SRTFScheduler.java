@@ -41,7 +41,10 @@ public class SRTFScheduler {
                 for (Process p : important) {
                     executionOrder.add(p.ProcessId);
                     currentTime += p.RemainingTime;
-                    currentTime += ContextSwitch;
+
+                    timeLine time = new timeLine(p,lst_time,currentTime);
+                    TimeLine.add(time);
+                    lst_time = currentTime;
 
                     p.RemainingTime = 0;
 
@@ -51,6 +54,9 @@ public class SRTFScheduler {
                     totalWaitingTime += p.WaitingTime;
                     totalTurnaroundTime += p.TurnaroundTime;
                     executedCount++;
+                    if (currentTime > p.ArrivalTime) {
+                        currentTime += ContextSwitch;
+                    }
                 }
                 important.clear();
             } else if (!readyQueue.isEmpty()) {
@@ -59,6 +65,7 @@ public class SRTFScheduler {
                 // Check if the context switching is needed
                 if (!executionOrder.isEmpty() && executionOrder.get(executionOrder.size() - 1) != currentProcess.ProcessId) {
                     currentTime += ContextSwitch;  // Add context switching time
+                    lst_time = currentTime;
                 }
 
 
@@ -77,6 +84,9 @@ public class SRTFScheduler {
 
                 // Check if the process is completed
                 if (currentProcess.RemainingTime == 0) {
+                    timeLine time = new timeLine(currentProcess,lst_time,currentTime);
+                    TimeLine.add(time);
+                    lst_time = currentTime;
                     executedCount++;
                     currentProcess.TurnaroundTime = currentTime - currentProcess.ArrivalTime;
                     currentProcess.WaitingTime = currentProcess.TurnaroundTime - currentProcess.BurstTime;
@@ -84,6 +94,9 @@ public class SRTFScheduler {
                     totalWaitingTime += currentProcess.WaitingTime;
                     totalTurnaroundTime += currentProcess.TurnaroundTime;
                 } else {
+                    timeLine time = new timeLine(currentProcess,lst_time,currentTime);
+                    TimeLine.add(time);
+                    lst_time = currentTime;
                     // Add the process back to the ready queue if not completed
                     readyQueue.add(currentProcess);
                 }
@@ -109,8 +122,20 @@ public class SRTFScheduler {
         System.out.printf("Average Waiting Time: %.2f\n", averageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
 
+        List<timeLine>format = new ArrayList<timeLine>();
+        for(timeLine t : TimeLine) {
+            if (format.isEmpty()) {
+                format.add(t);
+            } else {
+                if (format.getLast().p.ProcessId == t.p.ProcessId) {
+                    format.getLast().end = t.end;
+                } else {
+                    format.add(t);
+                }
+            }
+        }
 
-        return TimeLine;
+        return format;
 
     }
 

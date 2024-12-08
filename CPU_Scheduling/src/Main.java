@@ -29,29 +29,31 @@ public class Main {
 //       }
 
 
-        List<Process> ProcessList = new ArrayList<>();
-        ProcessList.add(new Process(1, 0, 2,"0000"));
-        ProcessList.add(new Process(2, 0, 10,"0000"));
-        ProcessList.add(new Process(3, 1, 2,"0000"));
-        ProcessList.add(new Process(4, 2, 2,"0000"));
-        ProcessList.add(new Process(5, 3, 2,"0000"));
-
-
-        NonPreemptiveSJF SJF = new NonPreemptiveSJF();
-        List<timeLine>t = SJF.Schedule(ProcessList,2);
-        for(timeLine tz : t) {
-           System.out.println(tz.p.ProcessId+" "+tz.start+" "+tz.end);
-       }
-
-
 //        List<Process> ProcessList = new ArrayList<>();
-//        ProcessList.add(new Process(1, 0, 8));
-//        ProcessList.add(new Process(2, 1, 4));
-//        ProcessList.add(new Process(3, 2, 9));
-//        ProcessList.add(new Process(4, 3, 5));
+//        ProcessList.add(new Process(1, 0, 6,"0000"));
+//        ProcessList.add(new Process(2, 0, 8,"0000"));
+//        ProcessList.add(new Process(3, 0, 7,"0000"));
+//        ProcessList.add(new Process(4, 0, 3,"0000"));
 //
-//        SRTFScheduler SRTF = new SRTFScheduler();
-//        SRTF.Schedule(ProcessList,1000,0);
+//
+//        NonPreemptiveSJF SJF = new NonPreemptiveSJF();
+//        List<timeLine>t = SJF.Schedule(ProcessList,1000);
+//        for(timeLine tz : t) {
+//           System.out.println(tz.p.ProcessId+" "+tz.start+" "+tz.end);
+//       }
+
+
+        List<Process> ProcessList = new ArrayList<>();
+        ProcessList.add(new Process(1, 0, 8,"0000"));
+        ProcessList.add(new Process(2, 1, 4,"0000"));
+        ProcessList.add(new Process(3, 2, 9,"0000"));
+        ProcessList.add(new Process(4, 3, 5,"0000"));
+
+        SRTFScheduler SRTF = new SRTFScheduler();
+        List<timeLine>t = SRTF.Schedule(ProcessList,1000,2);
+        for(timeLine tz : t) {
+            System.out.println(tz.p.ProcessId+" "+tz.start+" "+tz.end);
+        }
 
 
     }
